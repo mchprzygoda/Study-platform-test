@@ -1,8 +1,1 @@
 <router-outlet></router-outlet>
-<div>Hello</div>
-
-@for(subject of subjects$ | async; track subject) {
-  <div> 
-    {{ subject.name }} {{ subject.subjectType }}
-  </div><br>
-}
