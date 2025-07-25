@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build --output-path=dist/study-platform --base-href=/Study-platform-test/",
-    "postbuild": "cp dist/study-platform/browser/index.html dist/study-platform/browser/404.html",
+    "postbuild": "copy dist/study-platform/browser/index.html dist/study-platform/browser/404.html",
     "deploy": "npm run build && npx angular-cli-ghpages --dir=dist/study-platform/browser",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
