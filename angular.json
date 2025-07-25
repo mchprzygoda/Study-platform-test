@@ -53,7 +53,8 @@
                   "maximumError": "4kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/Study-platform-test/"
             },
             "development": {
               "optimization": false,
