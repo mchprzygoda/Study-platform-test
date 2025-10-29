@@ -1,7 +1,7 @@
 import { CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
-import { auth } from '../../firebase/firebase-config';
+import { auth } from '../../../firebase/firebase-config';
 import { user } from '@angular/fire/auth';
 import { map, take } from 'rxjs';
 

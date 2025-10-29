@@ -6,10 +6,12 @@ import {
   addDoc,
   query,
   where,
+  Timestamp,
 } from '@angular/fire/firestore';
 import { Observable, of, switchMap } from 'rxjs';
 import { SubjectModel } from './subject.model';
 import { AuthService } from '../auth/auth.service';
+import { NoteModel } from './note.model';
 
 @Injectable({ providedIn: 'root' })
 export class SubjectService {
@@ -39,5 +41,19 @@ export class SubjectService {
         return collectionData(q, { idField: 'id' }) as Observable<SubjectModel[]>;
       })
     );
+  }
+
+  getNotes(subjectId: string): Observable<NoteModel[]> {
+    const notesRef = collection(this.firestore, `subjects/${subjectId}/notes`);
+    return collectionData(notesRef, { idField: 'id' }) as Observable<NoteModel[]>;
+  }
+
+  async addNote(subjectId: string, note: { title: string; content: string }): Promise<void> {
+    const notesRef = collection(this.firestore, `subjects/${subjectId}/notes`);
+    await addDoc(notesRef, {
+      title: note.title,
+      content: note.content,
+      createdAt: Timestamp.now(),
+    });
   }
 }

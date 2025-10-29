@@ -3,7 +3,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth/auth.service';
+import { AuthService } from './features/auth/auth.service';
 
 interface SubjectModel {
   readonly name : string;
