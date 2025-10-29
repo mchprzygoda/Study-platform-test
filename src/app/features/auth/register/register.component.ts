@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../auth.service';
 import { LogRegisterFormComponent } from '../logRegisterForm/form.component';
 import { CommonModule } from '@angular/common';
 

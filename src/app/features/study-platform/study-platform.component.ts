@@ -3,8 +3,8 @@ import { Component, inject, signal } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { Observable } from "rxjs";
 import { AuthService } from "../auth/auth.service";
-import { FooterComponent } from "../footer/footer.component";
-import { HeaderComponent } from "../header/header.component";
+import { FooterComponent } from "../../footer/footer.component";
+import { HeaderComponent } from "../../header/header.component";
 import { Firestore, collection, collectionData } from "@angular/fire/firestore";
 import { toSignal } from "@angular/core/rxjs-interop";
 

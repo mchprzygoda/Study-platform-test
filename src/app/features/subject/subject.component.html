@@ -1,0 +1,68 @@
+<app-header></app-header>
+<div class="flex flex-col p-6 text-white bg-gray-900 w-80 min-h-screen shadow-xl">
+  <h4 class="flex justify-between items-center mb-6 text-2xl font-bold">
+    <span>Subjects</span>
+    <button class="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-sm font-medium transition-colors" (click)="addSubject()">+</button>
+  </h4>
+
+  <div class="mb-3">
+    <input [(ngModel)]="newSubjectName" type="text" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Subject name">
+  </div>
+
+  <div class="mb-4">
+    <input [(ngModel)]="newSubjectType" type="text" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Subject type">
+  </div>
+
+  <ul class="flex flex-col mb-auto space-y-2">
+    @if (subjects() && subjects()!.length > 0) {
+      @for (subject of subjects()!; track subject.name) {
+        <li>
+          <a href="#" class="block p-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <span class="text-lg font-semibold text-white">{{ subject.name }} </span>
+            <span class="text-gray-400 text-sm">({{ subject.subjectType }})</span>
+          </a>
+        </li>
+      }
+    } @else {
+      <li>
+        <span class="text-gray-400">No subjects available.</span>
+      </li>
+    }
+  </ul>
+</div>
+
+  <!-- <div class="p-4 w-100">
+    @for (subject of subjects()!; track subject.id) {
+      <div class="mb-4">
+        <h3>{{ subject.name }}</h3>
+
+        <div class="row">
+          @for (note of getNotes(subject.id); track note.id) {
+            <div class="col-md-4 mb-3">
+              <app-card 
+              [title]="note.title" 
+              [content]="note.content" 
+              (editClick)="onEditNote(note)">
+            </app-card>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div> -->
+
+  <!-- @if (isModalOpen) {
+    <app-modal-note
+      (submitted)="onFormSubmit($event)"
+      (cancelled)="closeModal()">
+      <app-form-note
+        [title]="selectedNote?.title || ''"
+        [content]="selectedNote?.content || ''"
+        [isEditMode]="isEditMode"
+        (submitted)="onFormSubmit($event)"
+        (cancelled)="closeModal()">
+      </app-form-note>
+    </app-modal-note>
+  } -->
+
+<app-footer></app-footer>

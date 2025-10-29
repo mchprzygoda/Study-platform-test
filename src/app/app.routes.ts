@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { AuthComponent } from './auth/auth.component';
-import { StudyPlatform } from './study-platform/study-platform.component';
-import { authGuard } from './auth/auth.guard';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
-import { SubjectComponent } from './subject/subject.component';
+import { AuthComponent } from './features/auth/auth.component';
+import { StudyPlatform } from './features/study-platform/study-platform.component';
+import { authGuard } from './features/auth/auth.guard';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { SubjectComponent } from './features/subject/subject.component';
 
 export const routes: Routes = [
   {

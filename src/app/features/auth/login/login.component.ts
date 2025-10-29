@@ -3,7 +3,7 @@ import { Component, inject } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { LogRegisterFormComponent } from "../logRegisterForm/form.component";
-import { AuthService } from "../auth/auth.service";
+import { AuthService } from "../auth.service";
 
 @Component({
   selector: 'app-login',

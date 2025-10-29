@@ -12,7 +12,6 @@ export class AuthService {
   currentUserSig = signal<UserInterface | null | undefined>(undefined);
 
   constructor() {
-    // Subskrypcja strumienia user$ — aktualizujemy sygnał
     this.user$.subscribe(user => {
       if (user) {
         this.currentUserSig.set({
@@ -64,7 +63,7 @@ export class AuthService {
       return {
         uid: user.uid,
         email: user.email ?? '',
-        username: user.displayName ?? ''  // lub '' zamiast null, jeśli w interfejsie string bez null
+        username: user.displayName ?? ''
       };
     })
   );

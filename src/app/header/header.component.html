@@ -1,48 +1,42 @@
-<header>
-  <div class="custom-navbar px-3 py-2 text-white">
-    <div class="container-fluid ps-5 pe-5">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <a href="/" class="d-flex align-items-center my-2  me-lg-auto text-white text-decoration-none">
-          <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book Icon" width="32" height="32" class="me-2">
-          <span class="fs-4 fw-bold">Study Platform</span>
+<header class="bg-gray-900 shadow-lg">
+  <div class="px-6 py-4 text-white">
+    <div class="container mx-auto">
+      <div class="flex flex-wrap items-center justify-between">
+        <a href="/" class="flex items-center my-2 text-white no-underline">
+          <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book Icon" width="32" height="32" class="mr-3">
+          <span class="text-2xl font-bold">Study Platform</span>
         </a>
 
-        <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+        <ul class="flex space-x-1 md:space-x-4 items-center">
           <li>
-            <a href="#" class="nav-link text-white">
-              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#home"></use></svg>
-              Home
+            <a href="#" class="flex flex-col items-center px-3 py-2 text-white hover:bg-gray-800 rounded-lg transition-colors">
+              <span>Home</span>
             </a>
           </li>
           <li>
-            <a href="/subjects" class="nav-link text-white">
-              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#speedometer2"></use></svg>
-              Subjects
+            <a href="/subjects" class="flex flex-col items-center px-3 py-2 text-white hover:bg-gray-800 rounded-lg transition-colors">
+              <span>Subjects</span>
             </a>
           </li>
           <li>
-            <a href="#" class="nav-link text-white">
-              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#table"></use></svg>
-              Quiz/Test
+            <a href="#" class="flex flex-col items-center px-3 py-2 text-white hover:bg-gray-800 rounded-lg transition-colors">
+              <span>Quiz/Test</span>
             </a>
           </li>
           <li>
-            <a href="#" class="nav-link text-white">
-              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#grid"></use></svg>
-              Calendar
+            <a href="#" class="flex flex-col items-center px-3 py-2 text-white hover:bg-gray-800 rounded-lg transition-colors">
+              <span>Calendar</span>
             </a>
           </li>
-          <li class="nav-item dropdown text-center">
-            <a class="nav-link dropdown-toggle text-white px-2" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <div class="d-flex flex-column align-items-center">
-                <img src="https://cdn-icons-png.flaticon.com/512/16893/16893425.png" alt="account icon" width="24" height="24" class="mb-1">
-                <span>Account</span>
-              </div>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="#">Settings</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Log out</a></li>
+          <li class="relative group">
+            <button class="flex flex-col items-center px-3 py-2 text-white hover:bg-gray-800 rounded-lg transition-colors">
+              <img src="https://cdn-icons-png.flaticon.com/512/16893/16893425.png" alt="account icon" width="24" height="24" class="mb-1">
+              <span>Account</span>
+            </button>
+            <ul class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg hidden group-hover:block z-10">
+              <li><a class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-t-lg" href="#">Settings</a></li>
+              <li><hr class="border-gray-200"></li>
+              <li><a class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-b-lg" href="#">Log out</a></li>
             </ul>
           </li>
         </ul>
