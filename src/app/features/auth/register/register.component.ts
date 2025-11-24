@@ -18,15 +18,42 @@ export class RegisterComponent {
   errorMessage: string | null = null;
 
   onSubmit(data: { email: string; password: string; username?: string }): void {
+    // Resetuj poprzedni błąd
+    this.errorMessage = null;
+
+    // Walidacja - sprawdź czy username jest podany
+    if (!data.username || data.username.trim() === '') {
+      this.errorMessage = 'Username is required';
+      return;
+    }
+
     this.authService
-      .register(data.email, data.username ?? '', data.password)
+      .register(data.email, data.username.trim(), data.password)
       .subscribe({
         next: () => {
           this.router.navigateByUrl('/');
         },
         error: (err) => {
-          this.errorMessage = err.code;
+          console.error('Registration error:', err);
+          // Lepsza obsługa błędów Firebase
+          if (err.code) {
+            this.errorMessage = this.getErrorMessage(err.code);
+          } else {
+            this.errorMessage = err.message || 'An error occurred during registration';
+          }
         }
       });
+  }
+
+  private getErrorMessage(code: string): string {
+    const errorMessages: { [key: string]: string } = {
+      'auth/email-already-in-use': 'This email is already registered',
+      'auth/invalid-email': 'Invalid email address',
+      'auth/operation-not-allowed': 'Registration is not allowed',
+      'auth/weak-password': 'Password should be at least 6 characters',
+      'auth/missing-email': 'Email is required',
+      'auth/missing-password': 'Password is required'
+    };
+    return errorMessages[code] || `Registration failed: ${code}`;
   }
 }

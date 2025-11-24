@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from "@angular/core";
-import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, user } from "@angular/fire/auth";
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, user } from "@angular/fire/auth";
+import { Firestore, collection, doc, setDoc, getDoc } from "@angular/fire/firestore";
 import { from, map, Observable } from "rxjs";
 import { UserInterface } from "./user.interface";
 
@@ -7,6 +8,7 @@ import { UserInterface } from "./user.interface";
 @Injectable({providedIn: 'root'})
 export class AuthService {
   firebaseAuth = inject(Auth);
+  firestore = inject(Firestore);
   user$ = user(this.firebaseAuth);
 
   currentUserSig = signal<UserInterface | null | undefined>(undefined);
@@ -30,9 +32,22 @@ export class AuthService {
       this.firebaseAuth, 
       email, 
       password
-    ).then((response) => 
-      updateProfile(response.user, {displayName: username}),
-    );
+    ).then(async (response) => {
+      // Aktualizuj profil użytkownika z username
+      await updateProfile(response.user, {displayName: username});
+      
+      // Zapisz dane użytkownika do kolekcji users w Firestore używając userId jako ID dokumentu
+      const userDocRef = doc(this.firestore, 'users', response.user.uid);
+      await setDoc(userDocRef, {
+        userId: response.user.uid,
+        username: username,
+        email: email
+      }, { merge: true }); // merge: true - jeśli dokument już istnieje, zaktualizuj tylko te pola
+    }).catch((error) => {
+      // Przekaż błąd dalej, żeby mógł być obsłużony w komponencie
+      console.error('Firebase registration error:', error);
+      throw error;
+    });
 
     return from(promise);
   }
@@ -42,7 +57,20 @@ export class AuthService {
       this.firebaseAuth,
       email,
       password
-    ).then(() => {});
+    ).then(async (response) => {
+      // Sprawdź czy użytkownik istnieje w kolekcji users, jeśli nie - utwórz dokument
+      const userDocRef = doc(this.firestore, 'users', response.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        // Jeśli użytkownik nie istnieje w kolekcji users, utwórz dokument
+        await setDoc(userDocRef, {
+          userId: response.user.uid,
+          username: response.user.displayName || '',
+          email: response.user.email || email
+        });
+      }
+    });
     
     return from(promise);
   }
@@ -68,4 +96,9 @@ export class AuthService {
     })
   );
 }
+
+  logout(): Observable<void> {
+    const promise = signOut(this.firebaseAuth);
+    return from(promise);
+  }
 }
