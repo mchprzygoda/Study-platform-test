@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './features/auth/auth.component';
-import { StudyPlatform } from './features/study-platform/study-platform.component';
+import { MainPage } from './page/main/main.page';
 import { authGuard } from './features/auth/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
-import { SubjectComponent } from './features/subject/subject.component';
+import { SubjectsPage } from './page/subjects/subjects.page';
 
 export const routes: Routes = [
   {
@@ -14,7 +14,7 @@ export const routes: Routes = [
   },
   {
     path: 'main',
-    component: StudyPlatform,
+    component: MainPage,
     canActivate: [authGuard]
   },
   {
@@ -27,7 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'subjects',
-    component: SubjectComponent
+    component: SubjectsPage
   },
   // {
   //   path: 'quiz',

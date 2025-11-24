@@ -28,16 +28,26 @@
               <span>Calendar</span>
             </a>
           </li>
-          <li class="relative group">
-            <button class="flex flex-col items-center px-3 py-2 text-white hover:bg-gray-800 rounded-lg transition-colors">
+          <li class="relative account-menu-container">
+            <button 
+              (click)="toggleAccountMenu()"
+              class="flex flex-col items-center px-3 py-2 text-white hover:bg-gray-800 rounded-lg transition-colors">
               <img src="https://cdn-icons-png.flaticon.com/512/16893/16893425.png" alt="account icon" width="24" height="24" class="mb-1">
               <span>Account</span>
             </button>
-            <ul class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg hidden group-hover:block z-10">
-              <li><a class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-t-lg" href="#">Settings</a></li>
-              <li><hr class="border-gray-200"></li>
-              <li><a class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-b-lg" href="#">Log out</a></li>
-            </ul>
+            @if (isAccountMenuOpen()) {
+              <ul class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden">
+                @if (currentUser()?.username) {
+                  <li class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                    <p class="text-sm font-semibold text-gray-800">{{ currentUser()?.username }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ currentUser()?.email }}</p>
+                  </li>
+                }
+                <li><a class="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors" href="#">Settings</a></li>
+                <li><hr class="border-gray-200"></li>
+                <li><button type="button" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer transition-colors" (click)="onLogout()">Log out</button></li>
+              </ul>
+            }
           </li>
         </ul>
       </div>

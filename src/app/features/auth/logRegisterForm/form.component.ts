@@ -1,15 +1,16 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-log-register-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.scss']
 })
-export class LogRegisterFormComponent {
+export class LogRegisterFormComponent implements OnChanges {
   @Input() isLoginOpen: boolean = true;
 
   @Output() formSubmitted = new EventEmitter<{ 
@@ -23,19 +24,26 @@ export class LogRegisterFormComponent {
   form = this.fb.nonNullable.group({
     username: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required]
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isLoginOpen']) {
+      const usernameControl = this.form.get('username');
+      if (this.isLoginOpen) {
+        // Podczas logowania username nie jest wymagany
+        usernameControl?.clearValidators();
+      } else {
+        // Podczas rejestracji username jest wymagany
+        usernameControl?.setValidators([Validators.required]);
+      }
+      usernameControl?.updateValueAndValidity();
+    }
+  }
 
   onSubmit(): void {
     if (this.form.valid) {
       this.formSubmitted.emit(this.form.getRawValue());
     }
   }
-
-  ngOnInit(): void {
-  if (this.isLoginOpen) {
-    this.form.get('username')?.clearValidators();
-    this.form.get('username')?.updateValueAndValidity();
-  }
-}
 }

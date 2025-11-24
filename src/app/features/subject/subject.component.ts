@@ -1,27 +1,17 @@
 import { CommonModule } from "@angular/common";
 import { Component, inject } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { FooterComponent } from "../../footer/footer.component";
-import { HeaderComponent } from "../../header/header.component";
 import { SubjectService } from "./subject.service";
 import { SubjectModel } from "./subject.model";
 import { FormsModule } from "@angular/forms";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { CardComponent } from "../../card/card.component";
-import { ModalNoteComponent } from "../modal-note/modal-note.component";
 import { NoteModel } from "./note.model";
 
 @Component({
   selector: 'app-subject',
   standalone: true,
   imports: [
-    RouterOutlet,
     CommonModule,
-    FormsModule,
-    FooterComponent,
-    HeaderComponent,
-    CardComponent,
-    ModalNoteComponent
+    FormsModule
   ],
   templateUrl: './subject.component.html',
   styleUrls: ['./subject.component.scss']

@@ -63,6 +63,10 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "open": true,
+            "port": 4200
+          },
           "configurations": {
             "production": {
               "buildTarget": "Study-platform:build:production"
