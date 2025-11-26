@@ -1,65 +1,223 @@
-<div class="flex flex-col p-6 text-white bg-gray-900 w-80 min-h-screen shadow-xl">
-  <h4 class="flex justify-between items-center mb-6 text-2xl font-bold">
-    <span>Subjects</span>
-    <button class="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-sm font-medium transition-colors" (click)="addSubject()">+</button>
-  </h4>
+<div class="flex bg-gray-100" style="min-height: calc(100vh - 120px);">
+  <!-- Sidebar -->
+  <aside class="w-80 bg-gray-800 text-white shadow-xl flex flex-col">
+    <div class="p-6 border-b border-gray-700">
+      <div class="flex justify-between items-center mb-4">
+        <h4 class="text-2xl font-bold">Subjects</h4>
+        <button 
+          class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+          (click)="openSubjectModal()">
+          <span class="text-xl">+</span>
+          <span>Add subject</span>
+        </button>
+      </div>
+    </div>
 
-  <div class="mb-3">
-    <input [(ngModel)]="newSubjectName" type="text" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Subject name">
-  </div>
+    <div class="flex-1 overflow-y-auto p-4">
+      <ul class="space-y-2">
+        @if (subjects() && subjects()!.length > 0) {
+          @for (subject of subjects()!; track subject.id) {
+            <li>
+              <button 
+                (click)="selectSubject(subject)"
+                class="w-full text-left p-4 rounded-lg bg-gradient-to-br transition-colors"
+                [class.from-blue-300]="selectedSubject()?.id === subject.id"
+                [class.to-purple-300]="selectedSubject()?.id === subject.id"
+                [class.from-blue-100]="selectedSubject()?.id !== subject.id"
+                [class.to-purple-100]="selectedSubject()?.id !== subject.id"
+                [class.hover:from-blue-200]="selectedSubject()?.id !== subject.id"
+                [class.hover:to-purple-200]="selectedSubject()?.id !== subject.id"
+                [class.hover:from-blue-400]="selectedSubject()?.id === subject.id"
+                [class.hover:to-purple-400]="selectedSubject()?.id === subject.id">
+                <div class="font-semibold text-lg text-gray-800">{{ subject.name }}</div>
+                <div class="text-gray-600 text-sm mt-1">{{ subject.subjectType }}</div>
+              </button>
+            </li>
+          }
+        } @else {
+          <li class="text-gray-400 text-center py-8">
+            <p>No subjects available.</p>
+            <p class="text-sm mt-2">Click "Add" to create one</p>
+          </li>
+        }
+      </ul>
+    </div>
+  </aside>
 
-  <div class="mb-4">
-    <input [(ngModel)]="newSubjectType" type="text" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Subject type">
-  </div>
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col">
+    @if (selectedSubject()) {
+      <!-- Subject Info Panel -->
+      <div class="bg-white shadow-md border-b border-gray-200 p-6">
+        <div class="max-w-7xl mx-auto">
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">{{ selectedSubject()!.name }}</h2>
+          <p class="text-gray-600">{{ selectedSubject()!.subjectType }}</p>
+        </div>
+      </div>
 
-  <ul class="flex flex-col mb-auto space-y-2">
-    @if (subjects() && subjects()!.length > 0) {
-      @for (subject of subjects()!; track subject.name) {
-        <li>
-          <a href="#" class="block p-3 rounded-lg hover:bg-gray-800 transition-colors">
-            <span class="text-lg font-semibold text-white">{{ subject.name }} </span>
-            <span class="text-gray-400 text-sm">({{ subject.subjectType }})</span>
-          </a>
-        </li>
-      }
-    } @else {
-      <li>
-        <span class="text-gray-400">No subjects available.</span>
-      </li>
-    }
-  </ul>
-</div>
+      <!-- Notes Grid -->
+      <div class="flex-1 p-6 overflow-y-auto">
+        <div class="max-w-7xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (note of notes(); track note.id) {
+              <app-card
+                [title]="note.title"
+                [content]="note.content"
+                (edit)="onEditNote(note)"
+                (delete)="onDeleteNote(note.id!)">
+              </app-card>
+            }
+            
+            <!-- Add Note Button -->
+            <button
+              (click)="openNoteModal('create')"
+              class="h-64 bg-gradient-to-br from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center border-2 border-dashed border-white/30 group">
+              <div class="text-center">
+                <span class="text-6xl text-white group-hover:scale-110 transition-transform block">+</span>
+                <span class="text-white font-semibold mt-2 block">Add Note</span>
+              </div>
+            </button>
+          </div>
 
-  <!-- <div class="p-4 w-100">
-    @for (subject of subjects()!; track subject.id) {
-      <div class="mb-4">
-        <h3>{{ subject.name }}</h3>
-
-        <div class="row">
-          @for (note of getNotes(subject.id); track note.id) {
-            <div class="col-md-4 mb-3">
-              <app-card 
-              [title]="note.title" 
-              [content]="note.content" 
-              (editClick)="onEditNote(note)">
-            </app-card>
+          @if (notes().length === 0) {
+            <div class="text-center py-16">
+              <p class="text-gray-500 text-lg">No notes yet</p>
             </div>
           }
         </div>
       </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <div class="text-6xl mb-4">📚</div>
+          <h3 class="text-2xl font-bold text-gray-700 mb-2">Select a subject</h3>
+          <p class="text-gray-500 mb-6">Choose a subject from the sidebar to view its notes</p>
+          @if (subjects()!.length === 0) {
+            <button
+              (click)="openSubjectModal()"
+              class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+              Create your first subject
+            </button>
+          }
+        </div>
+      </div>
     }
-  </div> -->
+  </main>
+</div>
 
-  <!-- @if (isModalOpen) {
-    <app-modal-note
-      (submitted)="onFormSubmit($event)"
-      (cancelled)="closeModal()">
-      <app-form-note
-        [title]="selectedNote?.title || ''"
-        [content]="selectedNote?.content || ''"
-        [isEditMode]="isEditMode"
-        (submitted)="onFormSubmit($event)"
-        (cancelled)="closeModal()">
-      </app-form-note>
-    </app-modal-note>
-  } -->
+<!-- Subject Modal -->
+@if (isSubjectModalOpen()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeSubjectModal()">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="p-6 border-b border-gray-200">
+        <h3 class="text-2xl font-bold text-gray-800">Add New Subject</h3>
+      </div>
+      
+      <form [formGroup]="subjectForm" (ngSubmit)="addSubject()" class="p-6">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2" for="subjectName">
+            Subject Name *
+          </label>
+          <input
+            id="subjectName"
+            type="text"
+            formControlName="name"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="e.g., Mathematics">
+          @if (subjectForm.get('name')?.invalid && subjectForm.get('name')?.touched) {
+            <p class="text-red-500 text-xs mt-1">Subject name is required</p>
+          }
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2" for="subjectType">
+            Subject Type *
+          </label>
+          <input
+            id="subjectType"
+            type="text"
+            formControlName="subjectType"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="e.g., Science">
+          @if (subjectForm.get('subjectType')?.invalid && subjectForm.get('subjectType')?.touched) {
+            <p class="text-red-500 text-xs mt-1">Subject type is required</p>
+          }
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            type="button"
+            (click)="closeSubjectModal()"
+            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="subjectForm.invalid"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors">
+            Add Subject
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Note Modal -->
+@if (isNoteModalOpen()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeNoteModal()">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <div class="p-6 border-b border-gray-200">
+        <h3 class="text-2xl font-bold text-gray-800">{{ isEditMode() ? 'Edit Note' : 'Add New Note' }}</h3>
+      </div>
+      
+      <form [formGroup]="noteForm" (ngSubmit)="saveNote()" class="p-6">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2" for="noteTitle">
+            Title *
+          </label>
+          <input
+            id="noteTitle"
+            type="text"
+            formControlName="title"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter note title">
+          @if (noteForm.get('title')?.invalid && noteForm.get('title')?.touched) {
+            <p class="text-red-500 text-xs mt-1">Title is required</p>
+          }
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2" for="noteContent">
+            Content *
+          </label>
+          <textarea
+            id="noteContent"
+            formControlName="content"
+            rows="10"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            placeholder="Enter note content"></textarea>
+          @if (noteForm.get('content')?.invalid && noteForm.get('content')?.touched) {
+            <p class="text-red-500 text-xs mt-1">Content is required</p>
+          }
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            type="button"
+            (click)="closeNoteModal()"
+            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="noteForm.invalid"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors">
+            {{ isEditMode() ? 'Update Note' : 'Add Note' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
