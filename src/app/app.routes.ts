@@ -5,6 +5,10 @@ import { authGuard } from './features/auth/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { SubjectsPage } from './page/subjects/subjects.page';
+import { QuizPage } from './page/quiz/quiz.page';
+import { QuizComponent } from './features/quiz/components/quiz-list/quiz.component';
+import { QuizDetailComponent } from './features/quiz/components/quiz-detail/quiz-detail.component';
+import { QuizTakeComponent } from './features/quiz/components/quiz-take/quiz-take.component';
 
 export const routes: Routes = [
   {
@@ -29,10 +33,21 @@ export const routes: Routes = [
     path: 'subjects',
     component: SubjectsPage
   },
-  // {
-  //   path: 'quiz',
-  //   component: QuizComponent
-  // },
+  {
+    path: 'quiz',
+    component: QuizPage,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'quiz/:id',
+    component: QuizPage,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'quiz/:id/take',
+    component: QuizTakeComponent,
+    canActivate: [authGuard]
+  },
   // {
   //   path: 'calendar',
   //   component: CalendarComponent
