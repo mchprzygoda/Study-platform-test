@@ -1,0 +1,207 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header with Timer and Exit -->
+  <div class="bg-white shadow-md border-b border-gray-200 sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <button
+            (click)="exitQuiz()"
+            class="text-gray-600 hover:text-gray-900 text-sm font-medium">
+            ← Wróć
+          </button>
+          <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ subject()?.name }} - Quiz</h1>
+        </div>
+        <div class="flex items-center gap-6">
+          <!-- Timer -->
+          <div class="flex items-center gap-2">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-2xl font-bold" [class.text-red-600]="timeRemaining() < 60" [class.text-gray-900]="timeRemaining() >= 60">
+              {{ formatTime(timeRemaining()) }}
+            </span>
+          </div>
+          <!-- Finish Button -->
+          @if (!isQuizFinished()) {
+            <button
+              (click)="finishQuiz()"
+              class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
+              Zakończ Quiz
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (!isQuizFinished()) {
+    <!-- Progress Bar -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700">
+            Pytanie {{ currentQuestionIndex() + 1 }} z {{ totalQuestions() }}
+          </span>
+          <span class="text-sm font-medium text-gray-700">
+            {{ Math.round(getProgressPercentage()) }}%
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" [style.width.%]="getProgressPercentage()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Navigation (if more than 1 question) -->
+    @if (quizQuestions().length > 1) {
+      <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div class="flex gap-2 flex-wrap">
+            @for (question of quizQuestions(); track question.id; let i = $index) {
+              <button
+                (click)="goToQuestion(i)"
+                class="w-10 h-10 rounded-lg font-medium transition-colors"
+                [class.bg-blue-600]="i === currentQuestionIndex()"
+                [class.text-white]="i === currentQuestionIndex()"
+                [class.bg-green-100]="i !== currentQuestionIndex() && hasAnswer(question.id!)"
+                [class.text-green-700]="i !== currentQuestionIndex() && hasAnswer(question.id!)"
+                [class.bg-gray-200]="i !== currentQuestionIndex() && !hasAnswer(question.id!)"
+                [class.text-gray-700]="i !== currentQuestionIndex() && !hasAnswer(question.id!)">
+                {{ i + 1 }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Question Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      @if (getCurrentQuestion(); as question) {
+        <div class="bg-white rounded-lg shadow-md p-8">
+          <!-- Question Header -->
+          <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="px-3 py-1 text-xs font-semibold rounded-full"
+                    [class.bg-blue-100]="question.type === 'single'"
+                    [class.text-blue-800]="question.type === 'single'"
+                    [class.bg-green-100]="question.type === 'multiple'"
+                    [class.text-green-800]="question.type === 'multiple'">
+                {{ question.type === 'single' ? 'Jednokrotny wybór' : 'Wielokrotny wybór' }}
+              </span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">{{ question.question }}</h2>
+          </div>
+
+          <!-- Answers -->
+          <div class="space-y-4 mb-8">
+            @for (answer of question.answers; track answer.id) {
+              <label
+                class="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                [class.border-blue-500]="isAnswerSelected(question.id!, answer.id)"
+                [class.bg-blue-50]="isAnswerSelected(question.id!, answer.id)"
+                [class.border-gray-300]="!isAnswerSelected(question.id!, answer.id)"
+                [class.hover:border-blue-300]="!isAnswerSelected(question.id!, answer.id)">
+                @if (question.type === 'single') {
+                  <input
+                    type="radio"
+                    [name]="'question-' + question.id"
+                    [checked]="isAnswerSelected(question.id!, answer.id)"
+                    (change)="toggleAnswer(question.id!, answer.id)"
+                    class="w-5 h-5 text-blue-600 focus:ring-blue-500">
+                } @else {
+                  <input
+                    type="checkbox"
+                    [checked]="isAnswerSelected(question.id!, answer.id)"
+                    (change)="toggleAnswer(question.id!, answer.id)"
+                    class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                }
+                <span class="flex-1 text-gray-800 text-lg">{{ answer.text }}</span>
+              </label>
+            }
+          </div>
+
+          <!-- Navigation Buttons -->
+          @if (quizQuestions().length > 1) {
+            <div class="flex justify-between pt-6 border-t border-gray-200">
+              <button
+                (click)="previousQuestion()"
+                [disabled]="currentQuestionIndex() === 0"
+                class="px-6 py-2 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 text-gray-700 rounded-lg font-medium transition-colors">
+                ← Poprzednie
+              </button>
+              <button
+                (click)="nextQuestion()"
+                [disabled]="currentQuestionIndex() === quizQuestions().length - 1"
+                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors">
+                Następne →
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Results Screen -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <div class="mb-8">
+          <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">Quiz zakończony!</h2>
+          <p class="text-gray-600">Twój wynik</p>
+        </div>
+
+        <div class="mb-8">
+          <div class="text-6xl font-bold text-blue-600 mb-2">
+            {{ score() }} / {{ totalQuestions() }}
+          </div>
+          <div class="text-2xl text-gray-600 mb-4">
+            {{ Math.round((score() / totalQuestions()) * 100) }}%
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-4 max-w-md mx-auto">
+            <div class="bg-blue-600 h-4 rounded-full transition-all duration-300" [style.width.%]="(score() / totalQuestions()) * 100"></div>
+          </div>
+        </div>
+
+        <!-- Detailed Results -->
+        <div class="mt-8 text-left">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Szczegółowe wyniki:</h3>
+          <div class="space-y-4">
+            @for (question of quizQuestions(); track question.id; let i = $index) {
+              @if (getQuestionResult(question); as result) {
+                <div class="p-4 rounded-lg border-2" [class.border-green-500]="result.isCorrect" [class.bg-green-50]="result.isCorrect" [class.border-red-500]="!result.isCorrect" [class.bg-red-50]="!result.isCorrect">
+                  <div class="flex items-start justify-between mb-2">
+                    <span class="font-semibold text-gray-900">Pytanie {{ i + 1 }}:</span>
+                    @if (result.isCorrect) {
+                      <span class="px-2 py-1 bg-green-500 text-white text-xs font-semibold rounded">Poprawne</span>
+                    } @else {
+                      <span class="px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded">Błędne</span>
+                    }
+                  </div>
+                  <p class="text-gray-800 mb-2">{{ question.question }}</p>
+                  <div class="text-sm text-gray-600">
+                    <p><strong>Twoja odpowiedź:</strong> {{ result.userAnswersText }}</p>
+                    <p><strong>Poprawna odpowiedź:</strong> {{ result.correctAnswersText }}</p>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <button
+            (click)="exitQuiz()"
+            class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+            Wróć do quizów
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

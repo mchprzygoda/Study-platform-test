@@ -1,0 +1,319 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-md border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <button
+            (click)="router.navigate(['/quiz'])"
+            class="text-blue-600 hover:text-blue-700 mb-2 text-sm font-medium">
+            ← Wróć do quizów
+          </button>
+          <h1 class="text-3xl font-bold text-gray-900">{{ subject()?.name }}</h1>
+          <p class="text-gray-600 mt-1">{{ subject()?.subjectType }}</p>
+        </div>
+        <div class="flex gap-4">
+          <!-- Quiz Start Panel Toggle -->
+          <button
+            (click)="toggleQuizStartPanel()"
+            class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
+            Start Quiz
+          </button>
+          <!-- Add Question Button -->
+          <button
+            (click)="openQuestionModal()"
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+            <span class="text-xl">+</span>
+            <span>Add Question</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Start Panel -->
+  @if (isQuizStartPanelOpen()) {
+    <div class="bg-blue-50 border-b border-blue-200 py-4">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Konfiguracja Quizu</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Number of Questions -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Liczba pytań
+              </label>
+              <input
+                type="number"
+                [value]="numberOfQuestions()"
+                (input)="numberOfQuestions.set(+($any($event.target).value))"
+                min="1"
+                [max]="questions().length"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [placeholder]="'Maksymalnie: ' + questions().length">
+              <p class="text-sm text-gray-500 mt-1">
+                Dostępne pytania: {{ questions().length }}
+              </p>
+            </div>
+
+            <!-- Duration -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Czas trwania (minuty)
+              </label>
+              <select
+                [value]="duration()"
+                (change)="duration.set(+($any($event.target).value))"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                @for (option of getDurationOptions(); track option) {
+                  <option [value]="option">{{ option }} minut</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button
+              (click)="toggleQuizStartPanel()"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+              Anuluj
+            </button>
+            <button
+              (click)="startQuiz()"
+              [disabled]="questions().length === 0 || numberOfQuestions() > questions().length"
+              class="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors">
+              Rozpocznij Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Questions List -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if (questions().length > 0) {
+      <div class="space-y-6">
+        @for (question of questions(); track question.id) {
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4" 
+               [class.border-green-500]="question.type === 'multiple'"
+               [class.border-blue-500]="question.type === 'single'">
+            <!-- Question Header -->
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3 class="text-xl font-bold text-gray-900">{{ question.question }}</h3>
+                  <span class="px-3 py-1 text-xs font-semibold rounded-full"
+                        [class.bg-blue-100]="question.type === 'single'"
+                        [class.text-blue-800]="question.type === 'single'"
+                        [class.bg-green-100]="question.type === 'multiple'"
+                        [class.text-green-800]="question.type === 'multiple'">
+                    {{ question.type === 'single' ? 'Jednokrotny wybór' : 'Wielokrotny wybór' }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  (click)="openQuestionModal(question)"
+                  class="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors">
+                  Edytuj
+                </button>
+                <button
+                  (click)="deleteQuestion(question)"
+                  class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded transition-colors">
+                  Usuń
+                </button>
+              </div>
+            </div>
+
+            <!-- Answers -->
+            <div class="space-y-3 mt-4">
+              @for (answer of question.answers; track answer.id) {
+                <div class="flex items-center gap-3 p-3 rounded-lg"
+                     [class.bg-green-50]="answer.isCorrect"
+                     [class.border-2]="answer.isCorrect"
+                     [class.border-green-300]="answer.isCorrect">
+                  <div class="flex-shrink-0">
+                    @if (question.type === 'single') {
+                      <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                           [class.border-green-500]="answer.isCorrect"
+                           [class.bg-green-500]="answer.isCorrect">
+                        @if (answer.isCorrect) {
+                          <div class="w-2 h-2 rounded-full bg-white"></div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="w-5 h-5 border-2 flex items-center justify-center rounded"
+                           [class.border-green-500]="answer.isCorrect"
+                           [class.bg-green-500]="answer.isCorrect">
+                        @if (answer.isCorrect) {
+                          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                          </svg>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <span class="flex-1 text-gray-800" [class.font-semibold]="answer.isCorrect">
+                    {{ answer.text }}
+                  </span>
+                  @if (answer.isCorrect) {
+                    <span class="px-2 py-1 text-xs font-semibold bg-green-500 text-white rounded">
+                      Poprawna
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-12 bg-white rounded-lg shadow-md">
+        <p class="text-gray-500 text-lg mb-4">Nie masz jeszcze żadnych pytań</p>
+        <button
+          (click)="openQuestionModal()"
+          class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Dodaj pierwsze pytanie
+        </button>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Question Modal -->
+@if (isQuestionModalOpen()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeQuestionModal()">
+    <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <div class="p-6 border-b border-gray-200 sticky top-0 bg-white">
+        <h3 class="text-2xl font-bold text-gray-800">{{ isEditMode() ? 'Edytuj Pytanie' : 'Dodaj Nowe Pytanie' }}</h3>
+      </div>
+      
+      <form [formGroup]="questionForm" (ngSubmit)="saveQuestion()" class="p-6">
+        <!-- Question Text -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2" for="questionText">
+            Pytanie *
+          </label>
+          <textarea
+            id="questionText"
+            formControlName="question"
+            rows="3"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            placeholder="Wpisz pytanie..."></textarea>
+          @if (questionForm.get('question')?.invalid && questionForm.get('question')?.touched) {
+            <p class="text-red-500 text-xs mt-1">Pytanie jest wymagane</p>
+          }
+        </div>
+
+        <!-- Question Type -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Typ odpowiedzi *</label>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                formControlName="type"
+                value="single"
+                class="w-4 h-4 text-blue-600">
+              <span class="text-gray-700">Jednokrotny wybór (radio)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                formControlName="type"
+                value="multiple"
+                class="w-4 h-4 text-blue-600">
+              <span class="text-gray-700">Wielokrotny wybór (checkbox)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Answers -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <label class="block text-sm font-medium text-gray-700">Odpowiedzi *</label>
+            <button
+              type="button"
+              (click)="addAnswer()"
+              class="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded transition-colors">
+              + Dodaj odpowiedź
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            @for (answerControl of answersFormArray.controls; track $index; let i = $index) {
+              <div class="flex items-center gap-3 p-3 border border-gray-300 rounded-lg">
+                <!-- Correct Answer Indicator -->
+                <button
+                  type="button"
+                  (click)="toggleCorrectAnswer(i)"
+                  class="flex-shrink-0">
+                  @if (questionForm.get('type')?.value === 'single') {
+                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                         [class.border-green-500]="answerControl.value.isCorrect"
+                         [class.bg-green-500]="answerControl.value.isCorrect"
+                         [class.border-gray-300]="!answerControl.value.isCorrect">
+                      @if (answerControl.value.isCorrect) {
+                        <div class="w-3 h-3 rounded-full bg-white"></div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="w-6 h-6 border-2 flex items-center justify-center rounded transition-colors"
+                         [class.border-green-500]="answerControl.value.isCorrect"
+                         [class.bg-green-500]="answerControl.value.isCorrect"
+                         [class.border-gray-300]="!answerControl.value.isCorrect">
+                      @if (answerControl.value.isCorrect) {
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                      }
+                    </div>
+                  }
+                </button>
+
+                <!-- Answer Text Input -->
+                <input
+                  type="text"
+                  [value]="answerControl.value.text"
+                  (input)="updateAnswerText(i, $any($event.target).value)"
+                  class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Wpisz odpowiedź...">
+
+                <!-- Remove Answer Button -->
+                @if (answersFormArray.length > 2) {
+                  <button
+                    type="button"
+                    (click)="removeAnswer(i)"
+                    class="px-3 py-2 text-red-600 hover:bg-red-50 rounded transition-colors">
+                    Usuń
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <p class="text-sm text-gray-500 mt-2">
+            Kliknij na ikonę {{ questionForm.get('type')?.value === 'single' ? 'kółka' : 'kwadratu' }}, aby oznaczyć poprawną odpowiedź
+          </p>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex gap-3 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="closeQuestionModal()"
+            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Anuluj
+          </button>
+          <button
+            type="submit"
+            [disabled]="questionForm.invalid || answersFormArray.length < 2"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors">
+            {{ isEditMode() ? 'Zaktualizuj Pytanie' : 'Dodaj Pytanie' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
